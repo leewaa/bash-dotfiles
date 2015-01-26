@@ -1,0 +1,94 @@
+[user]
+  name = Peter Lehwess
+  email = pl@ninjaconcept.com
+
+[apply]
+  whitespace = nowarn
+
+[alias]
+  co = checkout
+  cob = checkout -b
+
+  br = branch
+  bra = branch -a
+
+  st = status
+  s = status -s -b
+
+  blame = blame -w
+  credit = commit --amend --author "$1 <$2>" -C HEAD
+
+  ci = commit --verbose
+  ca = commit --verbose --all
+  cia = commit --verbose --amend
+
+  df = diff --word-diff
+  ds = diff --stat
+  dc = diff --cached
+  changes = diff --name-status -r
+
+  aa = add --all
+  ap = add --patch
+  wc = whatchanged -p --abbrev-commit --pretty=medium
+
+  l = log --pretty=oneline --abbrev-commit
+  ll = log --pretty=oneline --abbrev-commit --max-count=25
+  la = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+  lp = log -p
+
+  lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --
+
+  # Experimental stuff
+  append = commit --amend
+  undo = reset --soft HEAD^1
+  pop = reset --soft HEAD^1
+  poph = reset --hard HEAD^1
+  review = log -p --max-count=1
+  unstage = reset HEAD
+
+  # Fancy logging.
+  #   h = head
+  #   hp = head with patch
+  #   r = recent commits, only current branch
+  #   ra = recent commits, all reachable refs
+  #   l = all commits, only current branch
+  #   la = all commits, all reachable refs
+  head = !git l -1
+  h = !git head
+  hp = "!source ~/.githelpers_gb && show_git_head"
+  r = !git l -30
+  ra = !git r --all
+  # l = "!source ~/.githelpers_gb && pretty_git_log"
+  # la = !git l --all
+
+  # Interactive rebase with the given number of latest commits
+  reb = "!r() { git rebase -i HEAD~$1; }; r"
+
+  # Amend the currently staged files to the latest commit
+  amend = commit --amend --reuse-message=HEAD
+
+[diff]
+  renames = true
+
+[color]
+  sh = auto
+  status = auto
+  branch = auto
+  diff = auto
+
+[github]
+  user = leewaa
+
+[core]
+  quotepath = false
+
+[mergetool]
+  keepBackup = true
+
+[color "branch"]
+  current = yellow reverse
+  local = yellow
+  remote = green
+
+[push]
+  default = simple
