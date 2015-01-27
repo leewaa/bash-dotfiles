@@ -1,115 +1,142 @@
-# Shell prompt based on the Solarized Dark theme.
-# Screenshot: http://i.imgur.com/EkEtphC.png
-# Heavily inspired by @necolas’s prompt: https://github.com/necolas/dotfiles
-# iTerm → Profiles → Text → use 13pt Monaco with 1.1 vertical spacing.
+#!/usr/bin/env bash
 
-if [[ $COLORTERM = gnome-* && $TERM = xterm ]] && infocmp gnome-256color >/dev/null 2>&1; then
-  export TERM='gnome-256color';
-elif infocmp xterm-256color >/dev/null 2>&1; then
-  export TERM='xterm-256color';
-fi;
+# This is a mix of bash-powerline https://github.com/riobard/bash-powerline
+# With some stuff from @mathiasbynens's shell prompt which was heavly
+# inspired from @necolas’s prompt: https://github.com/necolas/dotfiles
 
-prompt_git() {
-  local s='';
-  local branchName='';
+__powerline_git_prompt() {
 
-  # Check if the current directory is in a Git repository.
-  if [ $(git rev-parse --is-inside-work-tree &>/dev/null; echo "${?}") == '0' ]; then
+    # Unicode symbols
+    readonly PS_SYMBOL_DARWIN=''
+    readonly PS_SYMBOL_LINUX='$'
+    readonly PS_SYMBOL_OTHER='%'
+    readonly GIT_BRANCH_SYMBOL='⑂ '
+    readonly GIT_BRANCH_STAGED_SYMBOL='+'
+    readonly GIT_BRANCH_UNSTAGED_SYMBOL='!'
+    readonly GIT_BRANCH_UNTRACKED_SYMBOL='?'
+    readonly GIT_BRANCH_STASHED_SYMBOL='$'
+    readonly GIT_NEED_PUSH_SYMBOL='⇡'
+    readonly GIT_NEED_PULL_SYMBOL='⇣'
 
-    # check if the current directory is in .git before running git checks
-    if [ "$(git rev-parse --is-inside-git-dir 2> /dev/null)" == 'false' ]; then
+    # Solarized colorscheme
+    readonly FG_BASE03="\[$(tput setaf 8)\]"
+    readonly FG_BASE02="\[$(tput setaf 0)\]"
+    readonly FG_BASE01="\[$(tput setaf 10)\]"
+    readonly FG_BASE00="\[$(tput setaf 11)\]"
+    readonly FG_BASE0="\[$(tput setaf 12)\]"
+    readonly FG_BASE1="\[$(tput setaf 14)\]"
+    readonly FG_BASE2="\[$(tput setaf 7)\]"
+    readonly FG_BASE3="\[$(tput setaf 15)\]"
 
-      # Ensure the index is up to date.
-      git update-index --really-refresh -q &>/dev/null;
+    readonly BG_BASE03="\[$(tput setab 8)\]"
+    readonly BG_BASE02="\[$(tput setab 0)\]"
+    readonly BG_BASE01="\[$(tput setab 10)\]"
+    readonly BG_BASE00="\[$(tput setab 11)\]"
+    readonly BG_BASE0="\[$(tput setab 12)\]"
+    readonly BG_BASE1="\[$(tput setab 14)\]"
+    readonly BG_BASE2="\[$(tput setab 7)\]"
+    readonly BG_BASE3="\[$(tput setab 15)\]"
 
-      # Check for uncommitted changes in the index.
-      if ! $(git diff --quiet --ignore-submodules --cached); then
-        s+='+';
-      fi;
+    readonly FG_YELLOW="\[$(tput setaf 3)\]"
+    readonly FG_ORANGE="\[$(tput setaf 9)\]"
+    readonly FG_RED="\[$(tput setaf 1)\]"
+    readonly FG_MAGENTA="\[$(tput setaf 5)\]"
+    readonly FG_VIOLET="\[$(tput setaf 13)\]"
+    readonly FG_BLUE="\[$(tput setaf 4)\]"
+    readonly FG_CYAN="\[$(tput setaf 6)\]"
+    readonly FG_GREEN="\[$(tput setaf 2)\]"
 
-      # Check for unstaged changes.
-      if ! $(git diff-files --quiet --ignore-submodules --); then
-        s+='!';
-      fi;
+    readonly BG_YELLOW="\[$(tput setab 3)\]"
+    readonly BG_ORANGE="\[$(tput setab 9)\]"
+    readonly BG_RED="\[$(tput setab 1)\]"
+    readonly BG_MAGENTA="\[$(tput setab 5)\]"
+    readonly BG_VIOLET="\[$(tput setab 13)\]"
+    readonly BG_BLUE="\[$(tput setab 4)\]"
+    readonly BG_CYAN="\[$(tput setab 6)\]"
+    readonly BG_GREEN="\[$(tput setab 2)\]"
 
-      # Check for untracked files.
-      if [ -n "$(git ls-files --others --exclude-standard)" ]; then
-        s+='?';
-      fi;
+    readonly DIM="\[$(tput dim)\]"
+    readonly REVERSE="\[$(tput rev)\]"
+    readonly RESET="\[$(tput sgr0)\]"
+    readonly BOLD="\[$(tput bold)\]"
 
-      # Check for stashed files.
-      if $(git rev-parse --verify refs/stash &>/dev/null); then
-        s+='$';
-      fi;
+    GIT_PROMPT_TEXT_COLOR=$FG_BASE3
+    GIT_PROMPT_PATH_COLOR=$BG_BASE1$GIT_PROMPT_TEXT_COLOR
+    GIT_PROMPT_BRANCH_COLOR=$BG_BLUE$GIT_PROMPT_TEXT_COLOR
+    GIT_PROMPT_MARKS_COLOR=$BG_GREEN$GIT_PROMPT_TEXT_COLOR
+    GIT_PROMP_BEHIND_COLOR=$BG_RED$GIT_PROMPT_TEXT_COLOR
+    GIT_PROMP_AHEAD_COLOR=$BG_GREEN$GIT_PROMPT_TEXT_COLOR
 
-    fi;
 
-    # Get the short symbolic ref.
-    # If HEAD isn’t a symbolic ref, get the short SHA for the latest commit
-    # Otherwise, just give up.
-    branchName="$(git symbolic-ref --quiet --short HEAD 2> /dev/null || \
-      git rev-parse --short HEAD 2> /dev/null || \
-      echo '(unknown)')";
+    # what OS?
+    case "$(uname)" in
+        Darwin)
+            readonly PS_SYMBOL=$PS_SYMBOL_DARWIN
+            ;;
+        Linux)
+            readonly PS_SYMBOL=$PS_SYMBOL_LINUX
+            ;;
+        *)
+            readonly PS_SYMBOL=$PS_SYMBOL_OTHER
+    esac
 
-    [ -n "${s}" ] && s=" [${s}]";
+    __git_info() {
+        [ -x "$(which git)" ] || return    # git not found
 
-    echo -e " ${white}[ ${1}${branchName}${blue}${s} ${white}]";
-  else
-    return;
-  fi;
+        # get current branch name or short SHA1 hash for detached head
+        local branch="$(git symbolic-ref --short HEAD 2>/dev/null || git describe --tags --always 2>/dev/null)"
+        [ -n "$branch" ] || return  # git branch not found
+
+        local marks
+
+        # Check for uncommitted changes in the index.
+        if ! $(git diff --quiet --ignore-submodules --cached); then
+          marks+="$GIT_BRANCH_STAGED_SYMBOL";
+        fi;
+
+        # Check for unstaged changes.
+        if ! $(git diff-files --quiet --ignore-submodules --); then
+          marks+="$GIT_BRANCH_UNSTAGED_SYMBOL";
+        fi;
+
+        # Check for untracked files.
+        if [ -n "$(git ls-files --others --exclude-standard)" ]; then
+          marks+="$GIT_BRANCH_UNTRACKED_SYMBOL";
+        fi;
+
+        # Check for stashed files.
+        if $(git rev-parse --verify refs/stash &>/dev/null); then
+          marks+="$GIT_BRANCH_STASHED_SYMBOL";
+        fi;
+
+        [ -n "${marks}" ] && marks=" [${marks}]";
+
+        # how many commits local branch is ahead/behind of remote?
+        local stat="$(git status --porcelain --branch | grep '^##' | grep -o '\[.\+\]$')"
+        local aheadN="$(echo $stat | grep -o 'ahead \d\+' | grep -o '\d\+')"
+        local behindN="$(echo $stat | grep -o 'behind \d\+' | grep -o '\d\+')"
+        [ -n "$aheadN" ] && ahead=" $GIT_NEED_PUSH_SYMBOL$aheadN"
+        [ -n "$behindN" ] && behind=" $GIT_NEED_PULL_SYMBOL$behindN"
+
+        printf " $GIT_BRANCH_SYMBOL$branch$ahead$behind$marks "
+    }
+
+    ps1() {
+        # Check the exit code of the previous command and display different
+        # colors in the prompt accordingly.
+        if [ $? -eq 0 ]; then
+            local BG_EXIT="$BG_GREEN"
+        else
+            local BG_EXIT="$BG_RED"
+        fi
+
+        PS1="$BG_BASE1$FG_BASE3 \W $RESET"
+        PS1+="$BG_BLUE$FG_BASE3$(__git_info)$RESET"
+        PS1+="$BG_EXIT$FG_BASE3 $PS_SYMBOL $RESET "
+    }
+
+    PROMPT_COMMAND=ps1
 }
 
-if tput setaf 1 &> /dev/null; then
-  tput sgr0; # reset colors
-  bold=$(tput bold);
-  reset=$(tput sgr0);
-  # Solarized colors, taken from http://git.io/solarized-colors.
-  black=$(tput setaf 0);
-  blue=$(tput setaf 33);
-  cyan=$(tput setaf 37);
-  green=$(tput setaf 64);
-  orange=$(tput setaf 166);
-  purple=$(tput setaf 125);
-  red=$(tput setaf 124);
-  violet=$(tput setaf 61);
-  white=$(tput setaf 15);
-  yellow=$(tput setaf 136);
-else
-  bold='';
-  reset="\e[0m";
-  black="\e[1;30m";
-  blue="\e[1;34m";
-  cyan="\e[1;36m";
-  green="\e[1;32m";
-  orange="\e[1;33m";
-  purple="\e[1;35m";
-  red="\e[1;31m";
-  violet="\e[1;35m";
-  white="\e[1;37m";
-  yellow="\e[1;33m";
-fi;
-
-# Highlight the user name when logged in as root.
-if [[ "${USER}" == "root" ]]; then
-  userStyle="${red}";
-else
-  userStyle="${orange}";
-fi;
-
-# Highlight the hostname when connected via SSH.
-if [[ "${SSH_TTY}" ]]; then
-  hostStyle="${bold}${red}";
-else
-  hostStyle="${yellow}";
-fi;
-
-# Set the terminal title to the current working directory.
-PS1="\[\033]0;\w\007\]";
-PS1+="\[${cyan}\]\W"; # working directory
-PS1+="\$(prompt_git \"${violet}\") "; # Git repository details
-
-PS1+="\[${white}\]\$ \[${reset}\]"; # `$` (and reset color)
-export PS1;
-
-PS2="\[${yellow}\]→ \[${reset}\]";
-export PS2;
+__powerline_git_prompt
+unset __powerline_git_prompt
