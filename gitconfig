@@ -14,6 +14,10 @@
 
   st = status
   s = status -s -b
+  
+  pt = push -u origin head
+  pu = push origin head
+  pf = push -f --force-with-lease
 
   blame = blame -w
   credit = commit --amend --author "$1 <$2>" -C HEAD
