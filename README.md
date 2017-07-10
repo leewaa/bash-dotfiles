@@ -1,7 +1,7 @@
 # bash-config
 My configuration using bash
 
-### Instalation
+### Installation
     cd ~
     mkdir development
     cd development
