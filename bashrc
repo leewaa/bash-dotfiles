@@ -18,4 +18,4 @@ alias reload=". ~/.bashrc"
 
 # completions for git
 source ~/.git-completion.sh
-source ~/.custom-prompt.sh
+source ~/.custom-git-prompt.sh
