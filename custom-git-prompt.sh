@@ -67,7 +67,6 @@ __powerline_git_prompt() {
     GIT_PROMP_BEHIND_COLOR=$BG_RED$GIT_PROMPT_TEXT_COLOR
     GIT_PROMP_AHEAD_COLOR=$BG_GREEN$GIT_PROMPT_TEXT_COLOR
 
-
     # what OS?
     case "$(uname)" in
         Darwin)
@@ -104,12 +103,12 @@ __powerline_git_prompt() {
           marks+="$GIT_BRANCH_UNTRACKED_SYMBOL";
         fi;
 
-        # Check for stashed files.
-        if $(git rev-parse --verify refs/stash &>/dev/null); then
-          marks+="$GIT_BRANCH_STASHED_SYMBOL";
-        fi;
+        # # Check for stashed files.
+        # if $(git rev-parse --verify refs/stash &>/dev/null); then
+        #   marks+="$GIT_BRANCH_STASHED_SYMBOL";
+        # fi;
 
-        [ -n "${marks}" ] && marks=" [${marks}]";
+        [ -n "${marks}" ] && marks=" [$FG_YELLOW${marks}$RESET]";
 
         # how many commits local branch is ahead/behind of remote?
         local stat="$(git status --porcelain --branch | grep '^##' | grep -o '\[.\+\]$')"
@@ -118,7 +117,7 @@ __powerline_git_prompt() {
         [ -n "$aheadN" ] && ahead=" $GIT_NEED_PUSH_SYMBOL$aheadN"
         [ -n "$behindN" ] && behind=" $GIT_NEED_PULL_SYMBOL$behindN"
 
-        printf " $GIT_BRANCH_SYMBOL$branch$ahead$behind$marks "
+        printf "($FG_RED$branch$RESET)$FG_GREEN$ahead$FG_RED$behind$RESET$marks"
     }
 
     ps1() {
@@ -130,12 +129,12 @@ __powerline_git_prompt() {
             local BG_EXIT="$BG_RED"
         fi
 
-        PS1="$BG_BASE1$FG_BASE3 \W $RESET"
-        PS1+="$BG_BLUE$FG_BASE3$(__git_info)$RESET"
-        PS1+="$BG_EXIT$FG_BASE3 $PS_SYMBOL $RESET "
+        PS1="$FG_BASE3\W$RESET"
+        PS1+="$FG_BASE3$(__git_info) $RESET"
+        PS1+="$BOLD$FG_RED$PS_SYMBOL_LINUX $RESET"
     }
 
-    PROMPT_COMMAND=ps1
+    export PROMPT_COMMAND=ps1
 }
 
 __powerline_git_prompt
