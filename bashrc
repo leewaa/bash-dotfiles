@@ -1,18 +1,21 @@
 export EDITOR='subl -w'
 
-export PATH=/usr/local/bin:/usr/bin:/bin:/Applications/Postgres.app/Contents/Versions/9.4/bin
+alias gst="git status"
+alias gs="git status"
 
-alias docs='cd ~/Documents'
-alias iosrepos='cd ~/Documents/iOSProjects/Repos'
-alias rr='cd ~/Documents/railsProjects/Repos'
-alias ho="subl /etc/hosts"
-alias s="subl"
-alias s.="s ."
+alias vs="code"
+alias vs.="vs ."
 
-alias glo='git log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit --'
-alias gcv='git commit -v'
-alias gst='git status'
-alias gs='git status -s -b'
+alias reload='. ~/.bash_profile'
+
+alias ll='ls -lGaf'
+
+alias permissions='ssh-add ~/.ssh/!(*.pub|known_hosts)'
+alias pg:restart='rm '/usr/local/var/postgres/postmaster.pid'; brew services stop postgresql; brew services start postgresql'
+
+# completions for git
+source ~/.git-completion.sh
+source ~/.custom-git-prompt.sh
 
 alias reload=". ~/.bashrc"
 
